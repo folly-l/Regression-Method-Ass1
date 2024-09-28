@@ -6,7 +6,7 @@ View(file)
 
 data(wblake)
 
-## 75% of the sample size
+## 66.67 or 67 % of the sample size
 smp_size <- floor((2/3) * nrow(wblake))
 
 ## set the seed to make your partition reproducible
@@ -21,7 +21,7 @@ test <- wblake[-train_ind, ]
 lage <- lm(Length ~ Age, data = train)
 summary(lage)
 
-ssr <- sum((fitted(lage) - mean(train$Length))^2)
+ssr <- sum 
 
 observed <- train$Length
 
