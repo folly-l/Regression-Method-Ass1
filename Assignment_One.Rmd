@@ -15,10 +15,9 @@ library(stats)
 
 ```{r}
 
-He <- "C:/Users/modim/Downloads/Regression Methods/RegressionMethods/Health_Sleep_Statistics.csv"
+He <- "C:/Users/modim/Downloads/Regression Methods/Regression-Method-Ass1/Health_Sleep_Statistics.csv"
 data <- read.csv(He)
 #View(Health)
-
 #library(ggplot2)
 #library(stats)
 #file <- "C:/Users/modim/Downloads/RegressionMethods/Health_Sleep_Statistis.csv"

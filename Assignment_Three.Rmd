@@ -1,0 +1,181 @@
+---
+title: "Question_3_Project_3"
+author: "Oluwanifemi"
+date: "2024-10-04"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set
+library(ggplot2)
+library(stats)
+library(alr4)
+file <- wblake
+View(file)
+
+```
+
+## Smallmouth bass (Data file: wblake)
+2.15.1 Using the West Bearskin Lake smallmouth bass data in the file
+wblake, obtain 95% intervals for the mean length at ages 2, 4,
+and 6 years.
+2.15.2 Obtain a 95% interval f or the mean length at age 9. Explain why
+this interval is likely to be untrustworthy.
+
+
+```{r}
+
+#PART 1
+
+model <- lm(Length ~ Age, data = file)
+summary(model)
+
+ages <- data.frame(Age = c(2, 4, 6))
+
+# Obtain 95% confidence intervals for the mean length at ages 2, 4, and 6
+predict(model, newdata = ages, interval = "confidence", level = 0.95)
+
+#PART 2
+x_0 <- 9
+y_hat_0 <- 65.5272 + (30.3239*9)
+se <- summary(model)$sigma 
+n_2 <- 437
+n <- nrow(file)
+x_bar <- mean(file$Age)
+se_2 <- se^2 #check how to raise power
+x_sum_sq <- sum((file$Age - x_bar)^2)
+
+se_y_hat_0 <- se * sqrt(1/n + (x_0 - x_bar)^2 / x_sum_sq)
+
+#alpha <- 0.05
+
+t_critical <- 1.966
+t_critical
+# Calculate the confidence interval
+lower_bound <- y_hat_0 - t_critical * se_y_hat_0
+upper_bound <- y_hat_0 + t_critical * se_y_hat_0        
+
+# Output the results
+c(lower_bound, upper_bound)
+
+#FOR CHECKING
+ages1 <- data.frame(Age = c(9))
+
+predict(model, newdata = ages1, interval = "confidence", level = 0.95)
+
+
+
+```
+
+\textbf{Why This Interval is Untrustworthy}
+The confidence interval for age 9 is likely untrustworthy because it may be an extrapolation beyond the range of the observed ages in the dataset. For example, if the data contains fish aged only up to 6 years, predicting for age 9 is unreliable since the linear model might not accurately capture the trend for such an age.
+
+
+
+## Question 3
+
+
+```{r}
+file_1 <-  "C:/Users/modim/Downloads/Regression Methods/Regression-Method-Ass1/Health_Sleep_Statistics.csv"
+
+data <- read.csv(file_1)
+
+model_1 <- lm(formula = Daily.Steps~Age, data = data)
+summary(model_1)
+
+```
+## Question 3(b)
+\textbf{1. Hypotheses:}
+
+\[
+\begin{aligned}
+H_0: \beta_1 = 0 \quad &\text{(No linear relationship between \textit{Age} and \textit{Daily Steps})} \\
+H_A: \beta_1 \neq 0 \quad &\text{(There is a linear relationship between \textit{Age} and \textit{Daily Steps})}
+\end{aligned}
+\]
+
+This is a two-sided test since we are testing whether \( \beta_1 \) is significantly different from zero.
+
+I will be using t-statistic
+The t-statistic follows a t-distribution with \( n - 2 \) degrees of freedom, where \( n \) is the number of observations in your sample.
+
+Let’s make our LINEar assumptions, which are captured as follows:
+
+Let \( Y_t \) be the number of Daily Steps in the \( t \)-th observation of the dataset, and let \( X_t \) be the corresponding Age for the same observation. 
+
+
+## Assumptions:
+
+The following assumptions must be satisfied to validate the test:
+
+\begin{itemize}
+  \item \textbf{Linearity}: The relationship between the independent variable (\textit{Age}) and the dependent variable (\textit{Daily Steps}) is linear.
+  \item \textbf{Independence}: The observations are independent of each other.
+  \item \textbf{Homoscedasticity}: The variance of the residuals is constant across all levels of the independent variable.
+  \item \textbf{Normality}: The residuals are approximately normally distributed.
+\end{itemize}
+
+```{r}
+
+summary_model <- summary(model_1)
+
+# Extract the slope estimate (beta_1) and standard error
+beta1 <- summary_model$coefficients["Age", "Estimate"]
+se_beta1 <- summary_model$coefficients["Age", "Std. Error"]
+
+# Calculate the t-statistic
+t_statistic <- beta1 / se_beta1
+t_statistic
+
+# Degrees of freedom
+df <- summary_model$df[2]
+
+# Critical value for two-tailed test at alpha = 0.1
+alpha <- 0.1
+t_critical <- qt(1 - alpha/2, df)
+t_critical
+
+# Compute the p-value
+p_value <- 2*pt(abs(t_statistic),df, lower.tail = FALSE)
+p_value
+
+
+
+
+
+
+```
+
+-17.76 in absolute from is greater than 1.660551, meaning our observed t_statistic is greater than the t_critical therefore we reject null hypothesis. Aside from this, p-value is lower than significance level of 0.05, further supporting the notion to reject null hypothesis.
+Therefore, we \textbf{reject \( H_0 \)} at the \( \alpha = 0.1 \) significance level, providing strong evidence that there is a significant linear relationship between \textit{Age} and \textit{Daily Steps}.That is, at least under
+our linear model with the linearity, independence, normality, and equal variance
+assumptions, we have sufficient evidence for an association between between \textit{Age} and \textit{Daily Steps}.
+
+```{r}
+beta1_hat <- coef(model_1)[2]  
+se_beta1_hat <- summary(model_1)$coefficients[2, 2]  
+n <- nrow(data)  
+alpha <- 0.10  
+df <- n - 2 
+t_value <- qt(1 - alpha / 2, df)
+margin_error <- t_value * se_beta1_hat
+lower_bound_beta1 <- beta1_hat - margin_error
+upper_bound_beta1 <- beta1_hat + margin_error
+print(c(lower_bound_beta1, upper_bound_beta1))
+
+# CHECKING: Construct a 90% confidence interval using confint()
+confint(model_1, level = 0.90)
+
+```
+
+
+## Relationship Between the Confidence Interval for \(\beta_1\) and the Null Hypothesis
+
+1. **Hypothesis Statement**:
+   - We set up the null hypothesis \(H_0: \beta_1 = 0\), which states that there is no linear relationship between Age and Daily Steps.
+   - The alternative hypothesis is \(H_A: \beta_1 \neq 0\), indicating that a relationship exists.
+
+2. **Confidence Interval Interpretation**:
+   - The 90% confidence interval for \(\beta_1\) provides a range of values that likely contain the true value of the slope coefficient.More specifically, we are “90% confident” that the true value of \(\beta_1\) falls within this range.
+   - The interval does **not include** 0, this suggests that it is unlikely that the true effect of Age on Daily Steps is zero. In this case, we have strong evidence against the null hypothesis \(H_0\). Therefore, we reject the null hypothesis at the 0.10 significance level.
+
