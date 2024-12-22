@@ -1,0 +1,185 @@
+---
+title: "Set_Ten"
+author: "Oluwanifemi"
+date: "2024-12-10"
+output: pdf_document
+---
+
+```{r}
+library(faraway)
+library(ggplot2)
+library(alr4)
+data("sat")
+
+```
+
+
+```{r}
+model_1 <- lm(total~expend+ratio+salary+takers, data = sat)
+summary(model_1)
+
+# QQ plot for normality of residuals
+qqnorm(residuals(model_1), main = "QQ Plot of Residuals")
+qqline(residuals(model_1), col = "red")
+
+```
+
+###  For the assumption of normality to be fulfilled, the points should be aligned along the QQ line, with little to no deviations at the end points and no visible "S" or "C" shape forming. Here, a light S shape is almost visible which shows that the graph is more heavy tailed than a plot properly fulfilling the assumption of normality, despite this, the main deviations at the top end so it does not violate normality a lot. I would say it aligns with the assumption of normality.
+
+
+```{r}
+# Simulate data
+set.seed(123)  # For reproducibility
+x1 <- rnorm(50)  # Draw x1 from standard normal distribution
+x2 <- rnorm(50)  # Draw x2 from standard normal distribution
+y <- 5 + 6*x1 - x2 + rnorm(50)  # Generate y based on the given model
+
+# Fit linear model
+model <- lm(y ~ x1 + x2)
+
+# Summary of the model
+summary(model)
+
+# Generate Normal QQ Plot
+qqnorm(residuals(model), main = "Normal QQ Plot of Residuals")
+qqline(residuals(model), col = "red")
+
+
+```
+###  The points in the QQ plot align closely along the red reference line. This is because the residuals are generated using a normal distribution (\(\epsilon\) ~ N(0, 1)), which aligns well with the assumption of normality in linear regression. Despite the slight devaitions, I would say it still fulfills the assumption of normality.
+
+```{r}
+# Simulate data
+set.seed(123)  # For reproducibility
+x1 <- rnorm(50)  # Draw x1 from standard normal distribution
+x2 <- rnorm(50)  # Draw x2 from standard normal distribution
+y <- 5 + 6*x1 - x2 + rchisq(50, df = 3) - 3  # Generate y with chi-squared residuals
+
+# Fit linear model
+model <- lm(y ~ x1 + x2)
+
+# Summary of the model
+summary(model)
+
+# Generate Normal QQ Plot
+qqnorm(residuals(model), main = "Normal QQ Plot of Residuals (Chi-squared Errors)")
+qqline(residuals(model), col = "red")
+
+```
+
+### Since the errors (\(\epsilon\)) come from a shifted chi-squared distribution, the QQ plot might show some heavy tails and significant deviation from the reference line, but a slight C shape seems to be forming due to outliers at the top and bottom, I would assume it does not fully violate the assumption of normality.
+
+
+```{r}
+
+#Added-variable plot for salary
+res1<- residuals(lm(total~expend+ratio+takers, data = sat))
+res2<-residuals(lm(salary~expend+ratio+takers, data = sat))
+plot(x = res2, y = res1,
+     xlab="Residuals: Salary vs all else",ylab="Residuals: Total vs all else")
+abline(lm(res1~res2))
+
+# Create the added-variable plot for salary
+#avPlot(model_1, variable = "salary", main = "Added-Variable Plot for Salary")
+
+
+```
+
+###  If the trend line is a straight line and the points are reasonably scattered around it without systematic deviations, linearity is likely satisfied. Here we see the line is slightly diagonal bt with the points reasonably scattered (equal variance). The line passes close to 0 on the plot, this aligns with the idea that the effect of salary on total is modest but present. I would say the assumption of linearity is not fully violated.
+
+
+
+###  1(e) Apply transformations to either the response variable or the predictor(s) to achieve linearity: Common transformations include logarithmic (log), square root (sqrt).
+
+
+```{r}
+data("dwaste")
+model_2 <- lm(O2UP~BOD+TKN+TS+TVS+COD, data = dwaste)
+summary(model_2)
+
+residuals <- resid(model_2)
+fitted_values <- fitted(model_2)
+
+diagnostic_data <- data.frame(Fitted = fitted_values, Residuals = residuals)
+
+ggplot(diagnostic_data, aes(x = Fitted, y = Residuals)) +
+  geom_point(color = "blue", alpha = 0.6) +  
+  geom_hline(yintercept = 0, color = "red", linetype = "dashed") + 
+  labs(title = "Residuals vs Fitted Values",
+       x = "Fitted Values",
+       y = "Residuals") +
+  theme_minimal()
+
+qqnorm(residuals(model_2), main = "Normal QQ Plot of Residuals")
+qqline(residuals(model_2), col = "red")
+
+```
+###  The graph being used to check the assumption of equal variance seems to slightly follow a downward trend and there's hardly enough vertical distance between the residuals, therefore it violates the assumption of equal variance.
+
+
+###  As for the assumption of normality, there is an outlier which should not be removed in case it is an influential point but aside from that, the other points align with the QQline, be it, the alignment is a little curved too, but I would not say it violates the assumption of normality greatly.
+```{r}
+# Load the MASS library
+library(MASS)
+
+
+out_bc <- boxcox(model_2, lambda = seq(-2, 3, 1/10), plotit = TRUE)
+abline(v = 0.5, col="red")
+
+boxcox(model_2, lambda = seq(-2, 3, 1/10), plotit = TRUE)
+abline(v = -0.5, col="red")
+
+#Extract exact lambda that gives maximum
+lambda <- out_bc$x[which.max(out_bc$y)]
+lambda
+
+
+
+
+```
+###  I used 0.5 as the red line, but it did not fall within the confidence interval, so I am not fully sure that a square root transformation might be acceptable. For ($\lambda = -0.28283$), this is a negative power transformation, which suggests that the response variable needs to be "stretched" or compressed in a non-linear way. Transformations with negative $\lambda$ tend to reduce the magnitude of large values in the response variable. Therefore, it might just be that a **negative square root transformation** would be more acceptable, as it falls within the confidence interval.
+
+
+
+```{r}
+log_model <- lm(log(O2UP) ~ BOD + TKN + TS + TVS + COD, data = dwaste)
+summary(log_model)
+
+# Evaluate residuals and assumptions for the transformed model
+#par(mfrow = c(2, 2))
+#plot(log_model)
+
+qqnorm(resid(log_model))
+qqline(resid(log_model))
+
+residuals <- resid(log_model)
+fitted_values <- fitted(log_model)
+
+ggplot(diagnostic_data, aes(x = Fitted, y = Residuals)) +
+  geom_point(color = "blue", alpha = 0.6) +  
+  geom_hline(yintercept = 0, color = "red", linetype = "dashed") + 
+  labs(title = "Residuals vs Fitted Values",
+       x = "Fitted Values",
+       y = "Residuals") +
+  theme_minimal()
+
+
+
+```
+###  Outliers are still present in this transformed model, but majority of the points seem to align with the linear line so I would say it fulfills the assumption of normality. As for equal variance, a pattern is still noticeable in the plot so it violates this assumption.
+
+
+```{r}
+
+```
+
+
+## Question 3
+
+### a) False, residuals and errors are related but have different distributions.
+
+### b) True, graphical diagnostics are more powerful in small samples for detecting assumption violations.
+
+### c) False, removing outliers is not a valid way to address normality violations.
+
+### d) True, large leverage values indicate unusual predictor values, but not necessarily unusual outcomes.

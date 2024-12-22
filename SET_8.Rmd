@@ -1,0 +1,87 @@
+---
+title: "SET_8"
+author: "Oluwanifemi"
+date: "2024-11-22"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(faraway)
+library(ggplot2)
+library(alr4)
+data("UN11")
+#head(UN11)
+```
+
+
+
+```{r}
+model_1 <- lm(formula = lifeExpF ~ I(log(ppgdp)) + pctUrban + fertility,
+data = UN11)
+
+summary(model_1)
+```
+
+### Question 1(b)
+
+### Conclusion for the Overall F-Test
+
+From the R output, the **overall F-test** evaluates whether at least one of the regression coefficients (excluding the intercept) is significantly different from zero.
+
+- **F-statistic**: 190.5  
+- **Degrees of Freedom (DF)**: 3, 195  
+- **p-value**: < 2.2 × 10<sup>-16</sup>  
+- **Significance Level ($\alpha$)**: 0.01  
+
+#### Conclusion:
+The p-value for the F-test (< 2.2 × 10<sup>-16</sup>) is much smaller than the significance level of 0.01.  
+**We reject the null hypothesis**, concluding that the model as a whole is statistically significant.
+
+#### Reasoning:
+At least one predictor in the model significantly contributes to explaining the variability in life expectancy.
+
+```{r}
+
+reduced_model <- lm(lifeExpF ~ fertility, data = UN11)
+
+# Perform the nested F-test
+anova_result <- anova(reduced_model, model_1)
+anova_result
+
+
+```
+
+### Testing Whether the Parameters for `log(ppgdp)` and `pctUrban` Are Both Zero
+
+#### 1. Hypotheses
+- **Null Hypothesis (\(H_0\))**: The parameters for `log(ppgdp)` and `pctUrban` are both 0. These variables do not contribute to explaining the variability in `lifeExpF`.
+- **Alternative Hypothesis (\(H_a\))**: At least one of the parameters for `log(ppgdp)` or `pctUrban` is not 0. Including these variables significantly improves the model.
+
+#### 2. Test Statistic
+The test statistic is the F-statistic from the ANOVA output:
+\[
+F = 25.814
+\]
+- **Degrees of Freedom**:
+  - Numerator (\(df_1\)): \(2\) (number of predictors added: `log(ppgdp)` and `pctUrban`).
+  - Denominator (\(df_2\)): \(195\) (residual degrees of freedom from the full model).
+
+#### 3. Significance Level
+The significance level (\(\alpha\)) is \(0.05\).
+
+#### 4. p-value
+From the ANOVA output:
+\[
+p = 1.133 \times 10^{-10}
+\]
+
+#### 5. Decision
+Compare the p-value to the significance level (\(\alpha = 0.05\)):
+\[
+p = 1.133 \times 10^{-10} < 0.05
+\]
+Since the p-value is much smaller than 0.05, we **reject the null hypothesis**.
+
+#### 6. Conclusion
+At the 0.05 significance level, there is sufficient evidence to conclude that the parameters for `log(ppgdp)` and/or `pctUrban` are not 0. Adding these predictors significantly improves the model's ability to explain `lifeExpF`.

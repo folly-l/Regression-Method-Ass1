@@ -1,0 +1,33 @@
+---
+title: "Final_Assignment"
+author: "Oluwanifemi"
+date: "2024-12-22"
+output: pdf_document
+---
+
+```{r}
+
+
+
+
+```
+
+
+
+```{r}
+
+
+
+
+```
+
+
+
+```{r}
+
+
+
+
+
+```
+

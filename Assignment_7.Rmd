@@ -1,0 +1,184 @@
+---
+title: "Assignment_7"
+author: "Oluwanifemi"
+date: "2024-11-03"
+output: pdf_document
+---
+
+```{r}
+library(faraway)
+library(ggplot2)
+library(alr4)
+library(ggpubr)
+library(tidyverse)
+library(broom)
+library(AICcmodavg)
+View(fuel2001)
+
+```
+### Question 2(c)
+
+
+```{r}
+fuel2001$Fuel <- fuel2001$FuelC/fuel2001$Pop
+fuel2001$Dlic <- fuel2001$Drivers/fuel2001$Pop
+ll<-lm(formula = Fuel ~ Tax + Dlic + Income + I(log(Miles)), data = fuel2001)
+summary(ll)
+anova_table <- anova(ll)
+print(anova_table)
+anova_model <- aov(Fuel ~ Tax + Dlic + Income + I(log(Miles)), data = fuel2001)
+print(anova_model)
+summary(anova_model)
+
+
+
+```
+
+
+
+### Explanation of ANOVA Table Components
+
+- **RSS** represents unexplained variance, showing how much variability in *Fuel* is not explained by the predictors.
+- **Res.Df** tells us the remaining degrees of freedom after fitting the predictors.
+- The **F-statistic of 11.99** (from the full model) suggests the overall model explains the response variable variance significantly better than a model with no predictors.
+The RSS in the aov table is 0.193700, which is about the same as my calculated RSS which was 0.1936784.
+The residual DF is 46, whichis the same as what I has calculated which was n-p (50-4) which is 46. The F-statistic is 11.9, the same as my calculation
+
+
+```{r}
+
+
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+## QUESTION 3
+
+## Given Information
+
+- We know that \( y \sim N_n(X\beta, \sigma^2 I_n) \), where:
+  - \( y \) is an \( n \)-dimensional vector of observed values,
+  - \( X \) is an \( n \times (p+1) \) matrix of predictors,
+  - \( \beta \) is a \((p+1)\)-dimensional vector of coefficients,
+  - \( \sigma^2 I_n \) is the covariance matrix of \( y \).
+
+- The projection (or "hat") matrix \( H = X(X'X)^{-1}X' \), is symmetric and idempotent:
+  - **Symmetric**: \( H = H' \),
+  - **Idempotent**: \( H^2 = H \).
+
+- The residual vector \( \hat{e} = y - \hat{y} \), where \( \hat{y} = Hy \) represents the fitted values:
+  \[
+  \hat{e} = y - \hat{y} = y - Hy = (I - H)y
+  \]
+
+---
+
+## Part (a): Show that \( \hat{e} \sim N_n(0_n, \sigma^2 (I - H)) \)
+
+The residual vector \( \hat{e} \) is given by:
+\[
+\hat{e} = (I - H)y
+\]
+
+Since \( y \sim N_n(X\beta, \sigma^2 I_n) \), we can write \( y = X\beta + \epsilon \), where \( \epsilon \sim N_n(0_n, \sigma^2 I_n) \). Therefore:
+\[
+\hat{e} = (I - H)(X\beta + \epsilon) = (I - H)X\beta + (I - H)\epsilon
+\]
+
+
+Taking the expectation of \( \hat{e} \):
+\[
+\mathbb{E}(\hat{e}) = (I - H)X\beta + (I - H)\mathbb{E}(\epsilon)
+\]
+
+Since \( \epsilon \) has mean zero, \( \mathbb{E}(\epsilon) = 0_n \), this reduces to:
+\[
+\mathbb{E}(\hat{e}) = (I - H)X\beta
+\]
+
+Note: \( H \) is a projection matrix onto the column space of \( X \), so \( HX\beta = X\beta \). This implies:
+\[
+(I - H)X\beta = X\beta - HX\beta = X\beta - X\beta = 0_n
+\]
+
+Thus, \( \mathbb{E}(\hat{e}) = 0_n \).
+
+
+To determine the covariance matrix of \( \hat{e} \), we calculate \( \text{Var}(\hat{e}) \):
+\[
+\text{Var}(\hat{e}) = \text{Var}((I - H)y) = (I - H) \text{Var}(y) (I - H)'
+\]
+
+Since \( \text{Var}(y) = \sigma^2 I_n \), we get:
+\[
+\text{Var}(\hat{e}) = (I - H)(\sigma^2 I_n)(I - H)' = \sigma^2 (I - H)(I - H)'
+\]
+
+Because \( I - H \) is symmetric and idempotent, \( (I - H)' = I - H \) and \( (I - H)^2 = I - H \), so:
+\[
+\text{Var}(\hat{e}) = \sigma^2 (I - H)
+\]
+
+### Conclusion for Part (a)
+
+ \( \hat{e} \) has a mean of \( 0_n \) and covariance matrix \( \sigma^2 (I - H) \), so:
+\[
+\hat{e} \sim N_n(0_n, \sigma^2 (I - H))
+\]
+
+---
+
+## Part (b): Show that \( \hat{\beta} \sim N_{p+1}(\beta, \sigma^2 (X'X)^{-1}) \)
+
+The estimator \( \hat{\beta} \) for \( \beta \) is given by:
+\[
+\hat{\beta} = (X'X)^{-1} X'y
+\]
+
+
+Substitute \( y = X\beta + \epsilon \) into the expression for \( \hat{\beta} \):
+\[
+\hat{\beta} = (X'X)^{-1} X'(X\beta + \epsilon)
+\]
+
+Distribute \( X' \):
+\[
+\hat{\beta} = (X'X)^{-1} X'X \beta + (X'X)^{-1} X'\epsilon
+\]
+
+Since \( (X'X)^{-1} X'X = I \), we have:
+\[
+\hat{\beta} = \beta + (X'X)^{-1} X' \epsilon
+\]
+
+
+Since \( \epsilon \) is mean-zero, the expectation of \( \hat{\beta} \) is:
+\[
+\mathbb{E}(\hat{\beta}) = \mathbb{E}(\beta + (X'X)^{-1} X' \epsilon) = \beta + (X'X)^{-1} X' \mathbb{E}(\epsilon) = \beta
+\]
+
+Thus, \( \hat{\beta} \) is an unbiased estimator of \( \beta \).
+
+
+To determine the covariance matrix of \( \hat{\beta} \), we calculate \( \text{Var}(\hat{\beta}) \):
+\[
+\text{Var}(\hat{\beta}) = \text{Var}(\beta + (X'X)^{-1} X' \epsilon)
+\]
+
+Since \( \beta \) is a constant and does not contribute to the variance, this simplifies to:
+\[
+\text{Var}(\hat{\beta}) = (X'X)^{-1} X' \, \text{Var}(\epsilon) \, X (X'X)^{-1}
+\]
+
+Since \( \text{Var}(\epsilon) = \sigma^2 I_n \), we have:
+\[
+\text{Var}(\hat{\beta}) = (X'X)^{-1} X' (\sigma^2 I_n) X (X'X)^{-1} = \sigma^2 (X'X)^{-1}
+\]
+
+### Conclusion for Part (b)
+
+ \( \hat{\beta} \) has a mean of \( \beta \) and covariance matrix \( \sigma^2 (X'X)^{-1} \). Thus:
+\[
+\hat{\beta} \sim N_{p+1}(\beta, \sigma^2 (X'X)^{-1})
+\]

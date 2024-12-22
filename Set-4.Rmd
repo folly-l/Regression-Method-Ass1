@@ -213,4 +213,4 @@ Substituting the values from the vectors:
 
 - **a)** False
 - **b)** True
-- **c)** True
+- **c)** True 

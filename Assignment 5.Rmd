@@ -1,0 +1,139 @@
+---
+title: "Set 5"
+author: "Oluwanifemi"
+date: "2024-10-24"
+output: pdf_document
+---
+
+```{r}
+library(ggplot2)
+library(stats)
+library(readxl)
+
+```
+
+
+## Question One
+
+```{r}
+
+
+birth_dat <- read_excel("birth_dat.xlsx")
+head(birth_dat) 
+X <- model.matrix(~ PerCapIncome + PopFarms + InfantMort, data= birth_dat)
+head(X)
+
+y = birth_dat$Birthrate
+XtX <- t(X) %*% X
+beta.hat <- solve(XtX, t(X)%*%y)
+beta.hat
+
+model <- lm(Birthrate ~ PerCapIncome + PopFarms + InfantMort, data = birth_dat)  
+coef(model) 
+#The results are the similar so in comparison, they are equal to each other.
+
+mexico_row <- birth_dat[birth_dat$Nation == "Mexico", ]
+mexico_row
+X_mexico <- model.matrix(~ PerCapIncome + PopFarms + InfantMort, data = mexico_row)
+fitted_mexico <- X_mexico %*% beta.hat 
+fitted_mexico 
+
+
+
+new_country <- data.frame(
+  PerCapIncome = 600,
+  PopFarms = 0.2,
+  InfantMort = 20
+)
+
+predicted_value <- predict(model, newdata = new_country)
+predicted_value
+
+residuals <- residuals(model)
+RSS <- (sum(residuals^2))
+RSS
+
+
+```
+
+## Question 2
+
+
+```{r}
+x <- 1:20
+set.seed(463)
+y <- x + rnorm(20)
+
+
+model1 <-lm(y~x)
+beta_model1 <- coef(model1)
+beta_model1
+
+X <- cbind(1, x)
+XtX <- t(X) %*% X
+beta_hat <- solve(XtX, t(X)%*%y)
+beta_hat
+
+x_2<- x^2
+model2 <-lm(y~x + x_2)
+coef(model2)
+X <- model.matrix(~ x + x_2)
+#head(X)
+XtX1 <- t(X) %*% X
+beta_hat1 <- solve(XtX1, t(X)%*%y)
+beta_hat1
+
+
+
+# Function to calculate estimates for polynomial terms up to degree 10
+calculate_polynomial_estimates <- function(degree) {
+ 
+  X_poly <- sapply(0:degree, function(d) x^d)
+  
+  # Attempting direct inversion
+  tryCatch({
+    XtX1 <- t(X_poly) %*% X_poly
+    beta_direct <- solve(XtX1, t(X_poly)%*%y)
+    return(beta_direct)
+  }, error = function(e) {
+    return("Direct inversion failed")
+  })
+}
+
+
+for (degree in 0:10) {
+  cat("Degree:", degree, "\n")
+  print(calculate_polynomial_estimates(degree))
+}
+
+#It fails when the degree is 6.
+
+
+set.seed(463)
+x2 <- x + rnorm(20, sd = 0.1)
+model3 <- lm(y ~ x + x2)
+correlation_x_x2 <- cor(x, x2)
+beta_lm3 <- coef(model3)
+correlation_x_x2 
+beta_lm3  
+#Both of them are highly correlated
+
+
+set.seed(463)
+x3 <- x + rnorm(20, sd = 0.001)
+model4 <- lm(y ~ x + x3)
+beta_lm4 <- coef(model4)
+cor(x, x3)  
+
+beta_lm4
+
+```
+### c) It fails when the number of degree is 6.
+
+### d) They are highly correlated (although this might raise the concern for multicollinearity).
+
+### e) Using the correlation being "1", there might be an issue of multicollinearity.The coefficent for x is approximately -999 and the coefficent for x3 is approximately 1000, htis might show that an increase in x csn be an almost exactly offset by an increase in x3, btu it mgith seems the model is assigning high sensitivity for small chnages in data.
+```{r}
+
+```
+
